@@ -1,0 +1,66 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+    - Class: rviz_default_plugins/PointCloud2
+      Enabled: true
+      Name: Saved map
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /r2/localization/saved_map
+      Size (Pixels): 2
+      Style: Flat Squares
+      Color Transformer: AxisColor
+    - Class: rviz_default_plugins/PointCloud2
+      Enabled: true
+      Name: Corrected cloud
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /r2/localization/corrected_cloud
+      Size (Pixels): 3
+      Style: Flat Squares
+      Color Transformer: FlatColor
+      Color: 255; 80; 40
+    - Class: rviz_default_plugins/Odometry
+      Enabled: true
+      Name: Global odometry
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /r2/global_odometry
+      Keep: 500
+  Enabled: true
+  Global Options:
+    Background Color: 25; 25; 25
+    Fixed Frame: map
+    Frame Rate: 30
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 25
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Pitch: 0.7853981633974483
+      Target Frame: <Fixed Frame>
+      Yaw: 0.7853981633974483
+Window Geometry:
+  Height: 900
+  Width: 1400

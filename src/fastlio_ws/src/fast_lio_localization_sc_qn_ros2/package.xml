@@ -20,6 +20,8 @@
   <depend>scancontext_tro</depend>
   <depend>nano_gicp</depend>
   <depend>quatro</depend>
+  <exec_depend>fast_lio</exec_depend>
+  <exec_depend>rviz2</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

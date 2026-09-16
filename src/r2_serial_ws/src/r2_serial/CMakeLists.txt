@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.8)
 project(r2_serial)
 
+if(POLICY CMP0148)
+  cmake_policy(SET CMP0148 OLD)
+endif()
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 OLD)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -16,6 +23,7 @@ find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(Threads REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   msg/InitialPosition.msg
@@ -31,7 +39,7 @@ add_executable(r2_data_downlink src/r2_data_downlink.cpp)
 target_include_directories(r2_data_downlink PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-target_link_libraries(r2_data_downlink Threads::Threads)
+target_link_libraries(r2_data_downlink Threads::Threads Boost::system)
 ament_target_dependencies(r2_data_downlink rclcpp std_msgs nav_msgs tf2)
 rosidl_get_typesupport_target(r2_serial_typesupport_target
   ${PROJECT_NAME} "rosidl_typesupport_cpp")

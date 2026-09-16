@@ -8,3 +8,5 @@ __pycache__/
 CLAUDE.md
 maps/
 bag_files/
+map/
+rosbag2_2026_09_11-12_19_30/

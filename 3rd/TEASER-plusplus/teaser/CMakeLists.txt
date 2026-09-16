@@ -3,6 +3,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 
+# Colcon rebuilds must not fail merely because an already-downloaded
+# dependency cannot be refreshed from GitHub.
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+
 FetchContent_Declare(pmc
     GIT_REPOSITORY https://github.com/jingnanshi/pmc.git
 )

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <asio.hpp>
+#include <boost/asio.hpp>
+#include <boost/system/error_code.hpp>
 
 #include <array>
 #include <atomic>
@@ -25,6 +26,9 @@
 #endif
 
 #include "r2_serial/transfer_protocol.hpp"
+
+namespace asio = boost::asio;
+using SerialErrorCode = boost::system::error_code;
 
 class SerialConnector {
 public:
@@ -57,7 +61,7 @@ public:
     state_->setRawReceiveHandler(std::move(handler));
   }
 
-  void setErrorHandler(std::function<void(std::error_code)> handler) {
+  void setErrorHandler(std::function<void(SerialErrorCode)> handler) {
     state_->setErrorHandler(std::move(handler));
   }
 
@@ -70,13 +74,13 @@ public:
 private:
   struct HandlerWrapperBase {
     virtual ~HandlerWrapperBase() = default;
-    virtual void execute(std::error_code ec, packet_t packet) = 0;
+    virtual void execute(SerialErrorCode ec, packet_t packet) = 0;
   };
 
   template <typename Handler> struct HandlerWrapper : HandlerWrapperBase {
     explicit HandlerWrapper(Handler handler) : handler_(std::move(handler)) {}
 
-    void execute(std::error_code ec, packet_t packet) override {
+    void execute(SerialErrorCode ec, packet_t packet) override {
       handler_(ec, std::move(packet));
     }
 
@@ -85,7 +89,7 @@ private:
 
   struct PendingWrite {
     std::vector<std::uint8_t> bytes;
-    std::function<void(std::error_code, std::size_t)> handler;
+    std::function<void(SerialErrorCode, std::size_t)> handler;
   };
 
   struct State : std::enable_shared_from_this<State> {
@@ -130,7 +134,7 @@ private:
       serial_port.async_read_some(
           asio::buffer(read_buffer),
           asio::bind_executor(
-              strand, [self](std::error_code ec, std::size_t bytes_read) {
+              strand, [self](SerialErrorCode ec, std::size_t bytes_read) {
                 if (!self->is_running.load()) {
                   return;
                 }
@@ -167,7 +171,7 @@ private:
     void clearPendingWrites() {
       auto self = shared_from_this();
       asio::post(strand, [self]() {
-        std::error_code ignored;
+        SerialErrorCode ignored;
         self->write_timer.cancel(ignored);
         self->dropPendingWrites(true);
       });
@@ -195,7 +199,7 @@ private:
           auto self = shared_from_this();
           write_timer.expires_after(earliest - now);
           write_timer.async_wait(asio::bind_executor(
-              strand, [self](std::error_code ec) {
+              strand, [self](SerialErrorCode ec) {
                 if (!ec && self->is_running.load()) {
                   self->startNextWrite();
                 }
@@ -214,7 +218,7 @@ private:
       asio::async_write(
           serial_port, asio::buffer(pending_writes.front().bytes),
           asio::bind_executor(
-              strand, [self](std::error_code ec, std::size_t bytes_written) {
+              strand, [self](SerialErrorCode ec, std::size_t bytes_written) {
                 self->write_in_progress = false;
                 if (self->pending_writes.empty()) {
                   return;
@@ -252,7 +256,7 @@ private:
       asio::dispatch(strand,
                      [self, wrapper = std::move(wrapper),
                       packet = std::move(packet)]() mutable {
-                       wrapper->execute(std::error_code(), std::move(packet));
+                       wrapper->execute(SerialErrorCode(), std::move(packet));
                      });
     }
 
@@ -264,7 +268,7 @@ private:
       });
     }
 
-    void setErrorHandler(std::function<void(std::error_code)> handler) {
+    void setErrorHandler(std::function<void(SerialErrorCode)> handler) {
       auto self = shared_from_this();
       asio::post(strand, [self, handler = std::move(handler)]() mutable {
         self->error_handler = std::move(handler);
@@ -281,7 +285,7 @@ private:
       pending_writes.clear();
     }
 
-    void failPendingWrites(const std::error_code &ec) {
+    void failPendingWrites(const SerialErrorCode &ec) {
       while (!pending_writes.empty()) {
         auto handler = std::move(pending_writes.front().handler);
         pending_writes.pop_front();
@@ -289,11 +293,11 @@ private:
       }
     }
 
-    void handleIoError(const std::error_code &ec) {
+    void handleIoError(const SerialErrorCode &ec) {
       if (!is_running.exchange(false)) {
         return;
       }
-      std::error_code ignored;
+      SerialErrorCode ignored;
       write_timer.cancel(ignored);
       serial_port.cancel(ignored);
       serial_port.close(ignored);
@@ -314,14 +318,14 @@ private:
         handler = std::move(request_handlers.front());
         request_handlers.pop();
       }
-      handler->execute(std::error_code(), std::move(packet));
+      handler->execute(SerialErrorCode(), std::move(packet));
     }
 
     void close() noexcept {
       if (!is_running.exchange(false)) {
         return;
       }
-      std::error_code ignored;
+      SerialErrorCode ignored;
       write_timer.cancel(ignored);
       serial_port.cancel(ignored);
       serial_port.close(ignored);
@@ -342,7 +346,7 @@ private:
     std::queue<packet_t> received_packets;
     std::deque<PendingWrite> pending_writes;
     std::function<void(const std::uint8_t *, std::size_t)> raw_receive_handler;
-    std::function<void(std::error_code)> error_handler;
+    std::function<void(SerialErrorCode)> error_handler;
   };
 
   std::shared_ptr<State> state_;

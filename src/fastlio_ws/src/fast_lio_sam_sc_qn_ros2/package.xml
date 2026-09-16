@@ -21,6 +21,7 @@
   <depend>scancontext_tro</depend>
   <depend>nano_gicp</depend>
   <depend>quatro</depend>
+  <exec_depend>fast_lio</exec_depend>
 
   <build_depend>eigen</build_depend>
   <build_depend>libpcl-all-dev</build_depend>

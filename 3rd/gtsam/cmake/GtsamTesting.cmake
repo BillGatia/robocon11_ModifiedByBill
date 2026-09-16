@@ -89,7 +89,12 @@ endmacro()
 enable_testing()
 
 #TODO(Varun) Move to HandlePrintConfiguration.cmake. This will require additional changes.
-option(GTSAM_BUILD_TESTS                 "Enable/Disable building of tests"          ON)	
+if(DEFINED ENV{COLCON})
+  set(_gtsam_tests_default OFF)
+else()
+  set(_gtsam_tests_default ON)
+endif()
+option(GTSAM_BUILD_TESTS                 "Enable/Disable building of tests"          ${_gtsam_tests_default})
 
 # Add option for combining unit tests
 if(MSVC OR XCODE_VERSION)

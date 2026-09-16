@@ -114,7 +114,7 @@ target_link_libraries(fast_lio_localization_sc_qn_node
 target_compile_options(fast_lio_localization_sc_qn_node PRIVATE -O3 -Wall -Wextra)
 
 install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config launch rviz DESTINATION share/${PROJECT_NAME})
 install(
   TARGETS ${PROJECT_NAME}_core fast_lio_localization_sc_qn_node
   EXPORT export_${PROJECT_NAME}

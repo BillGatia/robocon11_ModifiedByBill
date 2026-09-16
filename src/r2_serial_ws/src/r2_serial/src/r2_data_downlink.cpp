@@ -8,7 +8,7 @@
 #include <std_msgs/msg/u_int8.hpp>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>
-#include <asio.hpp>
+#include <boost/asio.hpp>
 
 #include <algorithm>
 #include <atomic>
@@ -221,7 +221,7 @@ private:
       connector->setMinWriteInterval(std::chrono::milliseconds(interval_ms));
 #endif
       const int interval_ms = 0;
-      connector->setErrorHandler([this](std::error_code ec) {
+      connector->setErrorHandler([this](SerialErrorCode ec) {
         handleSerialError(ec);
       });
       if (serial_debug_raw_) {
@@ -324,7 +324,7 @@ private:
     std::printf("=============================================\n");
   }
 
-  void handleSerialError(const std::error_code &ec) {
+  void handleSerialError(const SerialErrorCode &ec) {
     if (ec == asio::error::operation_aborted) {
       return;
     }
@@ -498,7 +498,7 @@ private:
       }
       connector = serial_connector_;
     }
-    connector->asyncReceive([this](std::error_code ec, packet_t packet) {
+    connector->asyncReceive([this](SerialErrorCode ec, packet_t packet) {
       if (!ec) {
         publishUplinkPacket(packet);
       }
@@ -579,7 +579,7 @@ private:
       connector->clearPendingWrites();
     }
     connector->asyncSend(
-        *packet, [this, code, packet, log_tx_detail](std::error_code ec,
+        *packet, [this, code, packet, log_tx_detail](SerialErrorCode ec,
                                                      std::size_t bytes_transferred) {
           if (!ec && bytes_transferred == static_cast<std::size_t>(packet->size())) {
             tx_success_count_.fetch_add(1);

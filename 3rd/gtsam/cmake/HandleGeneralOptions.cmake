@@ -9,7 +9,12 @@ else()
 endif()
 
 ### GtsamTesting related options
-option(GTSAM_BUILD_EXAMPLES_ALWAYS       "Build examples with 'make all' (build with 'make examples' if not)"       ON)
+if(DEFINED ENV{COLCON})
+  set(_gtsam_examples_default OFF)
+else()
+  set(_gtsam_examples_default ON)
+endif()
+option(GTSAM_BUILD_EXAMPLES_ALWAYS       "Build examples with 'make all' (build with 'make examples' if not)"       ${_gtsam_examples_default})
 option(GTSAM_BUILD_TIMING_ALWAYS         "Build timing scripts with 'make all' (build with 'make timing' if not"    OFF)
 ###
 
@@ -27,7 +32,12 @@ endif()
 # Configurable Options
 option(BUILD_SHARED_LIBS                     "Build shared libraries" ON)
 if(GTSAM_UNSTABLE_AVAILABLE)
-    option(GTSAM_BUILD_UNSTABLE              "Enable/Disable libgtsam_unstable"          ON)
+    if(DEFINED ENV{COLCON})
+        set(_gtsam_unstable_default OFF)
+    else()
+        set(_gtsam_unstable_default ON)
+    endif()
+    option(GTSAM_BUILD_UNSTABLE              "Enable/Disable libgtsam_unstable"          ${_gtsam_unstable_default})
     option(GTSAM_UNSTABLE_BUILD_PYTHON       "Enable/Disable Python wrapper for libgtsam_unstable" ON)
     option(GTSAM_UNSTABLE_INSTALL_MATLAB_TOOLBOX "Enable/Disable MATLAB wrapper for libgtsam_unstable" OFF)
 endif()
